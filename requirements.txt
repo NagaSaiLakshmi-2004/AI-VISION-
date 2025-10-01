@@ -1,0 +1,5 @@
+streamlit==1.50.0
+numpy
+Pillow
+opencv-python
+rembg==2.0.67
