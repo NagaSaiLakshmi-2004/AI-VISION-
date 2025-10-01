@@ -1,6 +1,0 @@
-streamlit==1.50.0
-pillow==9.5.0
-numpy==1.26.0
-rembg==2.2.0
-onnxruntime==1.15.1
-
