@@ -1,5 +1,5 @@
-streamlit==1.50.0
-numpy
-Pillow
-opencv-python
 rembg==2.0.67
+onnxruntime==1.23.0
+Pillow
+numpy
+streamlit==1.50.0
