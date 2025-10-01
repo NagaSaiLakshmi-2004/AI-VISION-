@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import numpy as np
 import io
+from rembg import remove
 import zipfile
 
 # ------------------ Masking Function ------------------
@@ -21,13 +22,6 @@ def mask_object(img):
     data[..., 3] = 255
 
     return Image.fromarray(data)
-
-# ------------------ Resize Function ------------------
-def resize_image(img, max_width=600):
-    """Resize image maintaining aspect ratio with a fixed medium width"""
-    w_percent = (max_width / float(img.width))
-    h_size = int((float(img.height) * float(w_percent)))
-    return img.resize((max_width, h_size))
 
 # ------------------ Page Config ------------------
 st.set_page_config(
@@ -53,7 +47,7 @@ st.sidebar.markdown("""
 **Instructions:**
 - Upload one or more images.
 - Row 1: Original and Masked images side by side.
-- Row 2: Overlay slider & overlay image in the middle.
+- Row 2: Overlay slider & overlay image in the middle (same size as above).
 - Download each masked image or all as ZIP.
 """)
 
@@ -108,18 +102,14 @@ if uploaded_files:
             original_image = Image.open(uploaded_file).convert("RGB")
             masked_image = mask_object(original_image)
 
-            # Resize all images to medium size (bigger than before)
-            original_resized = resize_image(original_image, max_width=800)
-            masked_resized = resize_image(masked_image, max_width=800)
-
             # ---------------- Row 1: Original | Masked ----------------
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader(f"🖼 Original: {uploaded_file.name}")
-                st.image(original_resized, width=600)
+                st.image(original_image, use_column_width=True)
             with col2:
                 st.subheader(f"✨ Masked: {uploaded_file.name}")
-                st.image(masked_resized, width=600)
+                st.image(masked_image, use_column_width=True)
                 
                 # Save masked for download
                 buf = io.BytesIO()
@@ -137,12 +127,12 @@ if uploaded_files:
             # ---------------- Row 2: Overlay Slider & Image ----------------
             st.subheader(f"🔄 Overlay for: {uploaded_file.name}")
             opacity = st.slider(f"Overlay Opacity", 0.0, 1.0, 0.5, key=f"slider_{uploaded_file.name}")
-            overlay = Image.blend(original_resized, masked_resized.convert("RGB"), alpha=opacity)
+            overlay = Image.blend(original_image, masked_image.convert("RGB"), alpha=opacity)
 
-            # Center overlay using columns
+            # Center overlay using columns, width same as original/masked images
             col_left, col_center, col_right = st.columns([1, 2, 1])
             with col_center:
-                st.image(overlay, width=600, caption=f"Overlay ({opacity*100:.0f}%)")
+                st.image(overlay, use_column_width=True, caption=f"Overlay ({opacity*100:.0f}%)")
     
     # Batch download ZIP
     st.download_button(
